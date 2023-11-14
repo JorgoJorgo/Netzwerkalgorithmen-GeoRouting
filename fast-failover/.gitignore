@@ -1,0 +1,11 @@
+__pycache__/
+benchmark_graphs_all/
+benchmark_graphs_test/
+benchmark_graphs/
+*.graphml
+*.gml
+*ml
+log.txt
+log*
+*.txt
+graph
