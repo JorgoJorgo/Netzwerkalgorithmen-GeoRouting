@@ -196,15 +196,80 @@ def start_file(filename):
     return out
 
 
+def run_custom(out=None, seed=0, rep=5):
+
+    original_params = [n, rep, k, samplesize, f_num, seed, name]
+    graphs = []
+    fails = []
+
+    graph1, fail1 = create_custom_graph()
+    graphs.append(graph1)
+    fails.append(fail1) 
+
+    for i in range(0, len(graphs)):
+        random.seed(seed)
+        kk = 5
+        g = graphs[i]
+        g.graph['k'] = kk
+        nn = len(g.nodes())
+        mm = len(g.edges())
+        ss = min(int(nn / 2), samplesize)
+        fn = min(int(mm / 2), f_num)
+        fails = fails[i]
+        g.graph['fails'] = fails
+        set_parameters([nn, rep, kk, ss, fn, seed, name + "CUSTOM"])
+        shuffle_and_run(g, out, seed, rep, graphs[i])
+        set_parameters(original_params)
+
+
+def run_faces(out=None, seed=0, rep=5):
+
+    original_params = [n, rep, k, samplesize, f_num, seed, name]
+    graphs = []
+    fails = []
+    faces = []
+
+
+    graph1, fail1, faces1 = create_faces_graph()
+    graphs.append(graph1)
+    fails.append(fail1) 
+
+    for i in range(0, len(graphs)):
+        random.seed(seed)
+        kk = 5
+        g = graphs[i]
+        g.graph['k'] = kk
+        nn = len(g.nodes())
+        mm = len(g.edges())
+        ss = min(int(nn / 2), samplesize)
+        fn = min(int(mm / 2), f_num)
+        fails = fails[i]
+        g.graph['fails'] = fails
+        set_parameters([nn, rep, kk, ss, fn, seed, name + "CUSTOM"])
+        shuffle_and_run(g, out, seed, rep, graphs[i])
+        set_parameters(original_params)
+
 # run experiments
 # seed is used for pseudorandom number generation in this run
 # switch determines which experiments are run
 
 #hier kann rep geändert werden
 def experiments(switch="all", seed=0, rep=100):
+
+    if switch in ["faces"]:
+        out = start_file("results/benchmark-custom-all-multiple-trees-FR" + str(o) + "-" + str(n) + "-" + str(k))
+        run_faces(out=out, seed=seed, rep=rep)
+        out.close()
+
+
     if switch in ["regular", "all"]:
         out = start_file("results/benchmark-regular-all-multiple-trees-FR" + str(o) + "-" + str(n) + "-" + str(k))
         run_regular(out=out, seed=seed, rep=rep)
+        out.close()
+
+    if switch in ["custom"]:
+        out = start_file("results/benchmark-custom-all-multiple-trees-FR" + str(o) + "-" + str(n) + "-" + str(k))
+        run_custom(out=out, seed=seed, rep=rep)
         out.close()
 
     if switch in ["zoo", "all"]:

@@ -1,5 +1,9 @@
+import pprint
+import secrets
 import statistics
 import sys
+
+from faces import *
 import networkx as nx
 import numpy as np
 import itertools
@@ -7,6 +11,7 @@ import random
 import time
 from routing import *
 
+random.seed()
 # global variables
 seed = 1
 n = 10
@@ -503,6 +508,20 @@ def write_graphs():
         f.write(s[:-1])
         f.close()
 
+ 
+def create_faces_graph():
+    G = create_random_planar_graph(30, 3)
+    
+    nx.draw_planar(G, with_labels=True)
+    
+    fails = list()
+    
+    plt.show()
+
+    pprint.pprint(find_faces(G))
+    
+    return G,fails,find_faces(G)
+
 def create_custom_graph():
     #jetziger graph ist der beispielgraph für die motivation von mod breite in multipletrees
     g = nx.Graph()
@@ -601,6 +620,9 @@ def create_custom_graph():
     # fails.append((5,15))
     
     return g,fails
+
+
+
 
 # read generated k-regular graphs from file system
 def read_graph(i):
