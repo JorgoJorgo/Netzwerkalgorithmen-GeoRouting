@@ -1,4 +1,4 @@
-In diesem Repository befindet sich der Code zur Bachelorarbeit "Analyse, Verbesserung und Evaluation von baumbasierten Fast Failover Routingalgorithmen" von Georgios Karamoussanlis.
+In diesem Repository befindet sich der Code zur Studienleistung des Moduls "Netzwerkalgorithmen" von Georgios Karamoussanlis.
 Es gelten die Infomationen der read.me aus dem ursprünglichen [fast failover](https://gitlab.cs.univie.ac.at/ct-papers/fast-failover) Framework auf dem dieses Repository basiert.
 
 Die Ergebnisse, Dateien zu den Ausführungen und Log-Dateien aus den Plots der Arbeit sind in den ".._vs_.." Ordnern zu finden. 
@@ -14,7 +14,7 @@ pip install networkx numpy matplotlib pydot
 ```
 
 ## Überblick
-
+* faces.py : enthält alle Algorithmen für die Bildung der planaren Graphen und Bestimmung der Faces
 * trees.py : enthält alle Algorithmen für die Baumbildung und ihre Hilfsfunktionen
 * routing.py : Routingalgorithmen
 * benchmark_graphs: Ordner für genutzten Topologien
@@ -30,28 +30,28 @@ Die Topologien sind zu finden unter [Rocketfuel](https://research.cs.washington.
 
 Um einen Durchlauf des Experiments zu starten muss Folgendes eingegeben werden *und die auszuführende Datei muss im Hauptverzeichnis liegen*: 
 ```
-python3 multiple_trees_experiments.py regular
-```
-Weitere Werte können der Ausführung mitgegeben werden um spezielle Durchläufe zu erhalten:
-```
-python3 multiple_trees_experiments.py (Zusätzliche Argumente : "regular", für randomisiert generierte Graphen / "zoo", für Topology-Zoo / "custom", für eigene Graphen)
+python3 multiple_trees_ALL_experiments.py faces
 ```
 
-Um eigene Experimente zu erstellen steht die benchmark_template.py bereit als Vorlage.
+
+Um eigene Experimente zu erstellen sollte die multiple_trees_ALL_experiments.py Datei kopiert werden.
 
 ## Ausführung eigener Topologien
-Um eigene Topologien zu nutzen müssen diese erst in (./objective_function_experiments.py) "create_custom_graph()" mit Hilfe von NetworkX definiert werden.
+Um eigene Topologien zu nutzen müssen diese erst in (./objective_function_experiments.py) "create_faces_graph()" mit Hilfe von NetworkX definiert werden.
 Dort erfolgt auch die Bestimmung der fehlerhaften Kanten.
-Anschließend muss folgende Funktion in die Experiment Datei eingefügt und aufgerufen werden mit dem "custom" Paramater: 
+
+Anschließend muss folgende Funktion in die Experiment Datei eingefügt und aufgerufen werden mit dem "faces" Paramater: 
 
 ```
-def run_custom(out=None, seed=0, rep=5):
+def run_faces(out=None, seed=0, rep=5):
 
     original_params = [n, rep, k, samplesize, f_num, seed, name]
     graphs = []
     fails = []
+    faces = []
 
-    graph1, fail1 = create_custom_graph()
+
+    graph1, fail1, faces1 = create_faces_graph()
     graphs.append(graph1)
     fails.append(fail1) 
 
@@ -69,6 +69,7 @@ def run_custom(out=None, seed=0, rep=5):
         set_parameters([nn, rep, kk, ss, fn, seed, name + "CUSTOM"])
         shuffle_and_run(g, out, seed, rep, graphs[i])
         set_parameters(original_params)
+
 ```
 
 
