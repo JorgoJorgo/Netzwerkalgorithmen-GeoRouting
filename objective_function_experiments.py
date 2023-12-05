@@ -3,12 +3,17 @@ import secrets
 import statistics
 import sys
 
+from matplotlib import pyplot as plt
+
 from faces import *
 import networkx as nx
 import numpy as np
 import itertools
 import random
 import time
+from faces import find_faces
+from faces import create_random_planar_graph
+from multigraph import GreedyMultiArborescenceDecompositionPreferUnused
 from routing import *
 
 random.seed()
@@ -496,7 +501,7 @@ def write_graphs():
         while nx.edge_connectivity(g) < k:
             g = nx.random_regular_graph(k, n).to_directed()
         prepare_graph(g,k,0)
-        GreedyArborescenceDecomposition(g)
+        GreedyMultiArborescenceDecompositionPreferUnused(g)
         d.append(depth(g))
         ecc.append(nx.eccentricity(g, 0))
         sp.append(nx.average_shortest_path_length(g))
@@ -510,17 +515,21 @@ def write_graphs():
 
  
 def create_faces_graph():
-    G = create_random_planar_graph(30, 3)
-    
-    nx.draw_planar(G, with_labels=True)
+
+    G = create_random_planar_graph(20, 3)
+
+    pos = nx.planar_layout(G)
+
+    # Graph zeichnen
+    for node, coordinates in pos.items():
+        plt.text(coordinates[0], coordinates[1], f"{coordinates}", fontsize=8, ha='left')
+
+
+    nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=8)
     
     fails = list()
     
-    plt.show()
-
-    pprint.pprint(find_faces(G))
-    
-    return G,fails,find_faces(G)
+    return G,fails,find_faces(G,pos),pos
 
 def create_custom_graph():
     #jetziger graph ist der beispielgraph für die motivation von mod breite in multipletrees

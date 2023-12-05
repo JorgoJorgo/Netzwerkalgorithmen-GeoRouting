@@ -9,7 +9,7 @@ import time
 import glob
 from objective_function_experiments import *
 from trees import multiple_trees_pre, multiple_trees_pre_breite_mod, multiple_trees_pre_breite_mod_and_inverse, multiple_trees_pre_num_of_trees_mod, multiple_trees_pre_num_of_trees_mod_and_random_order, multiple_trees_pre_order_of_edps_mod, multiple_trees_pre_parallel, multiple_trees_pre_parallel_and_inverse, multiple_trees_pre_recycling, one_tree_pre, one_tree_pre_breite_mod, one_tree_pre_mod_inverse
-from routing import PrepareSQ1, RouteMultipleTrees, RouteOneTree, RouteSQ1
+from routing import PrepareSQ1, RouteFaces, RouteMultipleTrees, RouteOneTree, RouteSQ1
 DEBUG = True
 
 # Data structure containing the algorithms under
@@ -31,21 +31,21 @@ DEBUG = True
 #
 
 # Hier erfolgt der Vergleich zwischen allen Modifikationen von MultipleTrees
-algos = {'MultipleTrees': [multiple_trees_pre, RouteMultipleTrees],
-'MultipleTrees Mod Breite': [multiple_trees_pre_breite_mod, RouteMultipleTrees],
-'MultipleTrees Mod Anzahl': [multiple_trees_pre_num_of_trees_mod, RouteMultipleTrees],
-'MultipleTrees Mod Reihenfolge': [multiple_trees_pre_order_of_edps_mod, RouteMultipleTrees],
-'MultipleTrees Mod Parallel': [multiple_trees_pre_parallel, RouteMultipleTrees],
-'Parallel and Inverse FR2': [multiple_trees_pre_parallel_and_inverse, RouteMultipleTrees],
-'Breite and Inverse FR2': [multiple_trees_pre_breite_mod_and_inverse, RouteMultipleTrees],
-'Anzahl and Random FR2' : [multiple_trees_pre_num_of_trees_mod_and_random_order, RouteMultipleTrees],
-'MultipleTrees Mod Recycling': [multiple_trees_pre_recycling, RouteMultipleTrees],
-
-'SquareOne FR3': [PrepareSQ1, RouteSQ1],
-
-'One Tree Breite Mod': [one_tree_pre_breite_mod,RouteOneTree],
-'OneTree' : [one_tree_pre , RouteOneTree],
-'OneTree Inverse Mod FR' : [one_tree_pre_mod_inverse,RouteOneTree],
+algos = {
+'Faces': [find_faces,RouteFaces],
+# 'MultipleTrees': [multiple_trees_pre, RouteMultipleTrees],
+# 'MultipleTrees Mod Breite': [multiple_trees_pre_breite_mod, RouteMultipleTrees],
+# 'MultipleTrees Mod Anzahl': [multiple_trees_pre_num_of_trees_mod, RouteMultipleTrees],
+# 'MultipleTrees Mod Reihenfolge': [multiple_trees_pre_order_of_edps_mod, RouteMultipleTrees],
+# 'MultipleTrees Mod Parallel': [multiple_trees_pre_parallel, RouteMultipleTrees],
+# 'Parallel and Inverse FR2': [multiple_trees_pre_parallel_and_inverse, RouteMultipleTrees],
+# 'Breite and Inverse FR2': [multiple_trees_pre_breite_mod_and_inverse, RouteMultipleTrees],
+# 'Anzahl and Random FR2' : [multiple_trees_pre_num_of_trees_mod_and_random_order, RouteMultipleTrees],
+# 'MultipleTrees Mod Recycling': [multiple_trees_pre_recycling, RouteMultipleTrees],
+# 'SquareOne FR3': [PrepareSQ1, RouteSQ1],
+# 'One Tree Breite Mod': [one_tree_pre_breite_mod,RouteOneTree],
+# 'OneTree' : [one_tree_pre , RouteOneTree],
+#'OneTree Inverse Mod FR' : [one_tree_pre_mod_inverse,RouteOneTree],
 }
 
 # run one experiment with graph g
@@ -63,12 +63,17 @@ def one_experiment(g, seed, out, algo):
     reset_arb_attribute(g)
     random.seed(seed)
     t = time.time()
-    precomputation = precomputation_algo(g)
+    if(precomputation_algo == algos["Faces"][0]):
+        pos = nx.planar_layout(g)
+        precomputation = precomputation_algo(g,pos)
+    else:
+        precomputation = precomputation_algo(g)
+
     print('Done with precomputation algo')
     pt = time.time() - t
     if precomputation == -1:  # error...
         out.write(', %f, %f, %f, %f, %f, %f\n' %
-                  (float('inf'), float('inf'), float('inf'), 0, 0, pt))
+                (float('inf'), float('inf'), float('inf'), 0, 0, pt))
         score = 1000*1000*1000
         return score
 
@@ -87,14 +92,14 @@ def one_experiment(g, seed, out, algo):
         if DEBUG: print('success', stat.succ, algo[0])
         # stretch, load, hops, success, routing time, precomputation time
         out.write(', %i, %i, %i, %f, %f, %f\n' %
-                  (np.max(stat.stretch), stat.load, np.max(stat.hops),
-                   success_ratio, rt, pt))
+                (np.max(stat.stretch), stat.load, np.max(stat.hops),
+                success_ratio, rt, pt))
         score = (2 - success_ratio) * (np.max(stat.stretch) + stat.load)
 
     else:
         if DEBUG: print('no success_ratio', algo[0])
         out.write(', %f, %f, %f, %f, %f, %f\n' %
-                  (float('inf'), float('inf'), float('inf'), 0, rt, pt))
+                (float('inf'), float('inf'), float('inf'), 0, rt, pt))
         score = 1000*1000
     return score
 
@@ -222,15 +227,15 @@ def run_custom(out=None, seed=0, rep=5):
         set_parameters(original_params)
 
 
-def run_faces(out=None, seed=0, rep=5):
+def run_faces(out=None, seed=0, rep=10):
 
     original_params = [n, rep, k, samplesize, f_num, seed, name]
     graphs = []
     fails = []
-    faces = []
+    faces1 = []
+    pos1 = []
 
-
-    graph1, fail1, faces1 = create_faces_graph()
+    graph1, fail1, faces1, pos1 = create_faces_graph()
     graphs.append(graph1)
     fails.append(fail1) 
 
@@ -245,7 +250,7 @@ def run_faces(out=None, seed=0, rep=5):
         fn = min(int(mm / 2), f_num)
         fails = fails[i]
         g.graph['fails'] = fails
-        set_parameters([nn, rep, kk, ss, fn, seed, name + "CUSTOM"])
+        set_parameters([nn, rep, kk, ss, fn, seed, name + "FACES"])
         shuffle_and_run(g, out, seed, rep, graphs[i])
         set_parameters(original_params)
 

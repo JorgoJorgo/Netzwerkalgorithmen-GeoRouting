@@ -14,15 +14,53 @@ from routing import *
 def create_random_planar_graph(number_nodes, number_edges):
     retry =0
     while retry < 100000:
+        print("Retry : ", retry)
         Grand = nx.random_regular_graph(number_edges, number_nodes, secrets.randbits(200))
         is_planar, embedding = nx.check_planarity(Grand)
         if is_planar:
             return embedding
+        retry = retry + 1
     
     raise Exception("No planar graph found.:(")
 
+
+
 # Find all the faces of a planar graph
-def find_faces(G):
+def find_faces(G, pos):
+    half_edges_in_faces = set()
+    faces = []
+
+    for node in G.nodes:
+
+        for dest in nx.neighbors(G, node):
+            # check every half edge of node if it is in a face
+            if (node, dest) not in half_edges_in_faces:
+                # This half edge has no face assigned
+                found_half_edges = set()
+                face_nodes = G.traverse_face(node, dest, found_half_edges)
+                half_edges_in_faces.update(found_half_edges)
+
+                # Create a subgraph for the face
+                face_graph = G.subgraph(face_nodes).copy()
+
+                # Add positions to nodes in the face graph
+                for face_node in face_graph.nodes:
+                    face_graph.nodes[face_node]['pos'] = pos[face_node]
+
+                faces.append(face_graph)
+
+
+    #ganz am ende muss der ganze Graph noch rein um die imaginäre Kante in jedem Durchlauf zu bilden
+    #und dann immer die Schnittpunkte zu bestimmen
+    graph_last = G
+    for node in graph_last:
+        graph_last.nodes[node]['pos'] = pos[node]
+    faces.append(graph_last)
+    return faces
+
+
+# Find all the faces of a planar graph
+def find_faces_Old(G,pos):
     half_edges_in_faces = set()
     faces = []
 
@@ -39,6 +77,33 @@ def find_faces(G):
 
     return faces
 
+
+def intersection_point(edge1, edge2, pos):
+    x1, y1 = pos[edge1[0]]
+    x2, y2 = pos[edge1[1]]
+    x3, y3 = pos[edge2[0]]
+    x4, y4 = pos[edge2[1]]
+
+    # Berechne die Parameter für die Geradengleichungen der beiden Kanten
+    a1 = y2 - y1
+    b1 = x1 - x2
+    c1 = x2 * y1 - x1 * y2
+
+    a2 = y4 - y3
+    b2 = x3 - x4
+    c2 = x4 * y3 - x3 * y4
+
+    # Berechne den Schnittpunkt
+    det = a1 * b2 - a2 * b1
+
+    if det == 0:
+        # Die Kanten sind parallel, es gibt keinen eindeutigen Schnittpunkt
+        return None
+    else:
+        x = (b1 * c2 - b2 * c1) / det
+        y = (a2 * c1 - a1 * c2) / det
+        return x, y
+
 # Return true if line segments vec1 and vec2 intersect
 def intersect(vec1, vec2):
     A = vec1[0]
@@ -47,7 +112,7 @@ def intersect(vec1, vec2):
     D = vec2[1]
     return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 
-#alte Methode um zu prüfen welche edge die nächste im clockwise order ist
+#hilfsmethode um den Schnittpunkt zu bestimmen
 def ccw(A,B,C):
     return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
 
@@ -101,6 +166,20 @@ def find_all_cycles(G, source=None, cycle_length_limit=None):
                 cycle_stack.pop()
     
     return [list(i) for i in output_cycles]
+
+#alte methode, als die faces noch arrays waren mit zahlen drin und keine networkx nodes
+def move_source_to_beginning(array, source):
+    if source not in array:
+        print("Error: Source node not found in the array.")
+        return array
+
+    # Index der Source-Knoten im Array finden
+    source_index = array.index(source)
+
+    # Neues Array erstellen, beginnend mit dem Source-Knoten
+    new_array = array[source_index:] + array[:source_index]
+
+    return new_array
 
 #alte methode um die planaren Graphen zu genrerien
 #parameter sind obere Limits für die Graph erstellung
