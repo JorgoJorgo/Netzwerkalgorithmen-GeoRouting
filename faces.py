@@ -2,6 +2,7 @@ import pprint
 import secrets
 import statistics
 import sys
+import traceback
 import networkx as nx
 import numpy as np
 import itertools
@@ -30,14 +31,30 @@ def find_faces(G, pos):
     half_edges_in_faces = set()
     faces = []
 
+    nx.draw(G, pos, with_labels=True, node_size=700, node_color="green", font_size=8)
+    plt.show()
+
     for node in G.nodes:
 
         for dest in nx.neighbors(G, node):
+
             # check every half edge of node if it is in a face
             if (node, dest) not in half_edges_in_faces:
+
                 # This half edge has no face assigned
                 found_half_edges = set()
-                face_nodes = G.traverse_face(node, dest, found_half_edges)
+
+                try:
+                    face_nodes = G.traverse_face(node, dest, found_half_edges)
+
+                except Exception as e:
+
+                    #nx.draw(G, pos, with_labels=True, node_size=700, node_color="red", font_size=8)
+
+                    #plt.show()
+                    traceback.print_exc()
+                    print(f"An unexpected error occurred: {e}")
+                    
                 half_edges_in_faces.update(found_half_edges)
 
                 # Create a subgraph for the face

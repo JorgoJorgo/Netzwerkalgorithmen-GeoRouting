@@ -525,8 +525,9 @@ def create_faces_graph():
         plt.text(coordinates[0], coordinates[1], f"{coordinates}", fontsize=8, ha='left')
 
 
-    nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=8)
-    
+    nx.draw(G, pos, with_labels=True, node_size=700, node_color="yellow", font_size=8)
+    plt.show()
+
     fails = list()
     
     return G,fails,find_faces(G,pos),pos

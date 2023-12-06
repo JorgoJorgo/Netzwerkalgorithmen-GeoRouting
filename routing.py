@@ -33,14 +33,6 @@ def set_routing_params(params):
 # Hilfsfunktion, um den näheren Punkt zur Destination zu finden
 def closer_point(point1, point2, reference_point):
 
-    print("Probiere jetzt den näheren Punkt zu finden : ")
-
-    print(point1)
-
-    print(point2)
-
-    print(reference_point)
-
     distance1 = math.sqrt((point1[0] - reference_point[0])**2 + (point1[1] - reference_point[1])**2)
     distance2 = math.sqrt((point2[0] - reference_point[0])**2 + (point2[1] - reference_point[1])**2)
 
@@ -107,6 +99,18 @@ def find_opposite_face(currentEdge, faces):
     # Wenn keine oder mehr als eine gemeinsame Kante gefunden wurde, ist etwas falsch
     return None
 
+
+# Hilfsfunktion um die Schnittpunkt-Datenstruktur zu erstellen 
+def create_intersection_structure(length):
+
+    intersection_structure = []
+
+    for i in range(length):
+    
+        intersection_structure.append((-99999999999,-99999999999999 , -99999999999999999999 , -99999999999999999))
+    
+    return intersection_structure
+
 ############################################################################################################
 
 
@@ -128,8 +132,8 @@ def RouteFaces(s,d,fails,faces):
     
     print("Routing in faces started for : ", s , " -> " , d) 
 
-    for face in faces:
-        print(face.nodes)
+    #for face in faces:
+    #    print(face.nodes)
 
     #print("Faces : " ,faces)
 
@@ -138,7 +142,7 @@ def RouteFaces(s,d,fails,faces):
     #als erstes muss man das erste Face finden von dem man aus startet, dafür stehen nur die Faces von s zur verfügung
     possible_start_faces = [face for face in faces[:-1] if s in face]
 
-    print("Faces mit Source ", s)
+    #print("Faces mit Source ", s)
 
     #for face in possible_start_faces:
     #    print(face.nodes)
@@ -287,9 +291,9 @@ def RouteFaces(s,d,fails,faces):
     
     nextNode = s
 
-    print("best_intersection[3] : ", best_intersection[3])
+    #print("best_intersection[3] : ", best_intersection[3])
 
-    input("CLICK")
+    #input("CLICK")
     
     #schleife um das jetzige face bis zum besten schnittpunkt durchzugehen
     while currentNode != best_intersection[2]:
@@ -301,16 +305,20 @@ def RouteFaces(s,d,fails,faces):
 
         # Überprüfe, welcher Nachbar der nächste ist
         if neighbors[0] == lastNode:
+            
             nextNode = neighbors[1]
+            
         else:
             nextNode = neighbors[0]
 
         # Aktualisiere die Knoten für die nächste Iteration
+        detour_edges.append((currentNode,next_node))
+        hops = hops +1
         lastNode = currentNode
         currentNode = nextNode    
 
 
-    print("CurrentFace Vorher : ", currentFace.nodes())
+    #print("CurrentFace Vorher : ", currentFace.nodes())
 
     #jetzt muss ich currentFace auf das nächste Face setzen
     #als erstes hab ich versucht nach der Regel zu gehen: "jede Kante ist in genau 2 Faces drin"
@@ -323,30 +331,133 @@ def RouteFaces(s,d,fails,faces):
 
     currentFace = face_pool[0]
 
-    print("CurrentFace Nachher : ", currentFace.nodes())
-    input(" ")
+    #print("CurrentFace Nachher : ", currentFace.nodes())
+    #input(" ")
     #jetzt bin ich im "2. Face"
+
+    scouting = True
+    lastWalk = False
+
+    
+
+    intersection_structure = create_intersection_structure(len(list(currentFace.nodes())))
+    best_intersection = (-999,-999,-999,-999)
+    scoutSource = currentNode
+    lastScoutNode = currentNode
+    nextNodeScout = list(currentFace.neighbors(currentNode))[0]
+
+    intersection_index = 0
 
     #danach kommt die schleife über die nächsten faces
     while(currentNode != d):
         
 
         #als erstes muss gescoutet werden
-        #dabei läuft man das ganze face entlang und speichert sich die schnittpunkte
+        #dabei läuft man das ganze currentface entlang und speichert sich die schnittpunkte
+        if(scouting==True):
+            
+            #als  erstes müssen die nodes weitergeschaltet werden
+
+            neighbors_next_node_scout = list(currentFace.neighbors(currentNode))
+            
+            if(neighbors_next_node_scout[0] == lastScoutNode):
+
+                currentNode = nextNodeScout
+
+                nextNodeScout = neighbors_next_node_scout[1]
+
+            else: 
+                
+                currentNode = nextNodeScout
+
+                nextNodeScout = neighbors_next_node_scout[1]
+
+            detour_edges.append((currentNode,nextNodeScout))
+            
+            hops = hops +1
+            
+            #das scouting ist beendet und wir haben die Schnittpunkte alle gespeichert
+            if(nextNodeScout == scoutSource):
+
+                scouting = False
+                lastWalk = True
 
 
-        #danach muss der beste schnittpunkt ermittelt werden
-        #könnte problem geben, bei dem der beste schnittpunkt nicht noch weitere faces besitzt ?
+            #dann muss die intersection bestimmt werden
+            pos_current_edge = (
+                faces[len(faces) - 1].nodes[currentNode]['pos'],
+                faces[len(faces) - 1].nodes[nextNodeScout]['pos']
+            )
 
-        #dann das face bis zum schnittpunkt durchlaufen
+            #prüfen ob die edge geschnitten wird
+            intersection = intersection_point(pos_current_edge, pos_imaginary_edge)
+
+            #wenn es zu einem Schnittpunkt kommt, dann muss man gucken ob der derzeitige Schnittpunkt besser ist als der neu gefundene
+            if(intersection != None):
+
+                currentNewIntersectionPoint = (intersection[0],intersection[1])
+
+                currentIntersectionPoint = (best_intersection[0],best_intersection[1])
+
+                currentImaginaryPoint = (faces[len(faces) - 1].nodes[d]['pos'][0], faces[len(faces) - 1].nodes[d]['pos'][1])
+
+                new_intersection = closer_point(currentNewIntersectionPoint, currentIntersectionPoint ,currentImaginaryPoint)
+
+                #wenn die neu gefundene Intersection besser ist als die alte
+                if(new_intersection == intersection):
+                    
+                    best_intersection = (intersection[0],intersection[1],currentNode,nextNodeScout)
+
+
+        #dann das face bis zum schnittpunkt durchlaufen und currentface umsetzen
+        if(lastWalk == True):
+            
+            #der letzte Lauf durch das Face ist fertig und es fängt ein neues face an
+
+            if(currentNode == best_intersection[3]):
+                lastWalk = False
+                scouting = True
+
+                #das nächste face wird mit der Methode bestimmt die oben auch verwendet wurde
+                #es wird das erste face genommen, welches einen Knoten der intersection enthält
+
+                updateFaces = faces[:-1]
+
+                face_pool = [face for face in updateFaces if currentNode in face]
+
+                face_pool.remove(currentFace)
+
+                currentFace = face_pool[0]
+
+                switches = switches + 1
+
+            #der letzte Lauf durch das Face ist NOCH NICHT fertig und es geht weiter
+            else: 
+                neighbors_next_node_scout = list(currentFace.neighbors(currentNode))
+            
+                if(neighbors_next_node_scout[0] == lastScoutNode):
+
+                    currentNode = nextNodeScout
+
+                    nextNodeScout = neighbors_next_node_scout[1]
+
+                else: 
+                    
+                    currentNode = nextNodeScout
+
+                    nextNodeScout = neighbors_next_node_scout[1]
+
+                detour_edges.append((currentNode,nextNodeScout))
+                
+                hops = hops +1
 
         #currentFace umschalten auf ein anderes face von einem knoten des schnittpunkts
-        print("Checking Face : ", currentFace)
+        print("Checking Face : ", list(currentFace.nodes()))
         break
     
-    print("Routing failed via Faces")
+    print("Routing success via Faces")
     print(" ")
-    return (True, hops, switches, detour_edges)
+    return (False, hops, switches, detour_edges)
 
 
 #in dieser funktion findet das routing eines source-destination-paares für multipletrees statt
