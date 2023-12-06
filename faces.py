@@ -14,7 +14,7 @@ from routing import *
 
 def create_random_planar_graph(number_nodes, number_edges):
     retry =0
-    while retry < 100000:
+    while retry < 1000000:
         print("Retry : ", retry)
         Grand = nx.random_regular_graph(number_edges, number_nodes, secrets.randbits(200))
         is_planar, embedding = nx.check_planarity(Grand)
@@ -49,9 +49,9 @@ def find_faces(G, pos):
 
                 except Exception as e:
 
-                    #nx.draw(G, pos, with_labels=True, node_size=700, node_color="red", font_size=8)
+                    nx.draw(G, pos, with_labels=True, node_size=700, node_color="red", font_size=8)
 
-                    #plt.show()
+                    plt.show()
                     traceback.print_exc()
                     print(f"An unexpected error occurred: {e}")
                     

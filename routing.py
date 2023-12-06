@@ -279,8 +279,11 @@ def RouteFaces(s,d,fails,faces):
     print("Best Intersection : ", best_intersection)
 
     #jetzt muss das Face gefunden werden, welches beide knoten enthält
+
     for i in range(len(faces)-2):
-        if(faces[i].has_node(best_intersection[2]) and faces[i].has_node(best_intersection[2])):
+
+        if(faces[i].has_node(best_intersection[2]) and faces[i].has_node(best_intersection[3])):
+
             currentFace = faces[i]
 
     #das currentFace bis zum Schnittpunkt durchlaufen
