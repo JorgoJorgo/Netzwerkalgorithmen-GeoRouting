@@ -32,7 +32,7 @@ def find_faces(G, pos):
     faces = []
 
     nx.draw(G, pos, with_labels=True, node_size=700, node_color="green", font_size=8)
-    plt.show()
+    #plt.show()
 
     for node in G.nodes:
 
@@ -51,7 +51,7 @@ def find_faces(G, pos):
 
                     nx.draw(G, pos, with_labels=True, node_size=700, node_color="red", font_size=8)
 
-                    plt.show()
+                    #plt.show()
                     traceback.print_exc()
                     print(f"An unexpected error occurred: {e}")
                     
@@ -69,7 +69,7 @@ def find_faces(G, pos):
 
     #ganz am ende muss der ganze Graph noch rein um die imaginäre Kante in jedem Durchlauf zu bilden
     #und dann immer die Schnittpunkte zu bestimmen
-    graph_last = G
+    graph_last = G.copy()
     for node in graph_last:
         graph_last.nodes[node]['pos'] = pos[node]
     faces.append(graph_last)

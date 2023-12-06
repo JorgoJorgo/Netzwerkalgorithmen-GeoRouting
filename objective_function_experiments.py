@@ -516,7 +516,7 @@ def write_graphs():
  
 def create_faces_graph():
 
-    G = create_random_planar_graph(20, 3)
+    G = create_random_planar_graph(30, 3)
 
     pos = nx.planar_layout(G)
 
@@ -529,6 +529,7 @@ def create_faces_graph():
     plt.show()
 
     fails = list()
+    G.graph["pos"] = pos
     
     return G,fails,find_faces(G,pos),pos
 
