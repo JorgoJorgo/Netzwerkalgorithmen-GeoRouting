@@ -194,6 +194,7 @@ def RouteFaces(s,d,fails,faces):
 
             if(next_node == d):
                 print("Routing succesful via Start-Faces")
+                print('------------------------------------------------------')
                 print(" ")
                 return (False, hops, switches, detour_edges)
             
@@ -275,8 +276,14 @@ def RouteFaces(s,d,fails,faces):
 
             best_intersection = intersection
 
+    #wenn das Startface keinen Schnittpunkt hat dann scheitert das Routing
+    #eventueller Sonderfall der noch behandelt werden muss, dass man dann das
+    #nächste face des besten Punktes nimmt. (man sucht dann alle Punkte ab die auch ein weiteres Face besitzen)
+    if(len(update_intersection_points_start_faces) == 0):
 
-    print("Best Intersection : ", best_intersection)
+        print("Routing failed via Faces, starting Face has no Intersection")
+        print('------------------------------------------------------')
+        return (True, hops, switches, detour_edges)
 
     #jetzt muss das Face gefunden werden, welches beide knoten enthält
 
@@ -301,7 +308,7 @@ def RouteFaces(s,d,fails,faces):
     #schleife um das jetzige face bis zum besten schnittpunkt durchzugehen
     while currentNode != best_intersection[2]:
 
-        print("CurrentNode : ", currentNode)
+        #print("CurrentNode : ", currentNode)
         
         # Finde die Nachbarn des aktuellen Knotens im aktuellen Face
         neighbors = list(currentFace.neighbors(currentNode))
@@ -334,14 +341,8 @@ def RouteFaces(s,d,fails,faces):
 
     currentFace = face_pool[0]
 
-    #print("CurrentFace Nachher : ", currentFace.nodes())
-    #input(" ")
-    #jetzt bin ich im "2. Face"
-
     scouting = True
     lastWalk = False
-
-    
 
     intersection_structure = create_intersection_structure(len(list(currentFace.nodes())))
     best_intersection = (-999,-999,-999,-999)
@@ -350,10 +351,17 @@ def RouteFaces(s,d,fails,faces):
     nextNodeScout = list(currentFace.neighbors(currentNode))[0]
 
     intersection_index = 0
+    
+    faceSwitchCounter = 1
 
     #danach kommt die schleife über die nächsten faces
     while(currentNode != d):
         
+        #falls man zu oft faces gewechselt hat, bricht das routing ab
+        if(faceSwitchCounter > (len(faces) + 1)):
+            print("Routing failed via Faces, switched more times than number of faces")
+            print('------------------------------------------------------')
+            return (True, hops, switches, detour_edges)
 
         #als erstes muss gescoutet werden
         #dabei läuft man das ganze currentface entlang und speichert sich die schnittpunkte
@@ -434,6 +442,8 @@ def RouteFaces(s,d,fails,faces):
 
                 switches = switches + 1
 
+                faceSwitchCounter = faceSwitchCounter + 1
+
             #der letzte Lauf durch das Face ist NOCH NICHT fertig und es geht weiter
             else: 
                 neighbors_next_node_scout = list(currentFace.neighbors(currentNode))
@@ -455,10 +465,14 @@ def RouteFaces(s,d,fails,faces):
                 hops = hops +1
 
         #currentFace umschalten auf ein anderes face von einem knoten des schnittpunkts
-        print("Checking Face : ", list(currentFace.nodes()))
+        #print("Checking Face : ", list(currentFace.nodes()))
         break
     
+
+    #hier würde man rauskommen, wenn die currentNode == d wird
+    #das könnte passieren, wenn man beim scouten des Faces auf die Destination stößt
     print("Routing success via Faces")
+    print('------------------------------------------------------')
     print(" ")
     return (False, hops, switches, detour_edges)
 
@@ -935,6 +949,8 @@ def RouteOneTree (s,d,fails,paths):
         print('------------------------------------------------------')
         return (True, hops, switches, detour_edges)
     else: 
+        print('Routing via Tree failed')
+        print('------------------------------------------------------')
         return (True, 0, 0, [])
 
 
@@ -972,7 +988,12 @@ def RouteDetCirc(s, d, fails, T):
             s = nxt
             hops += 1
         if hops > n or switches > k*n:
+            print('Routing via RouteDetCirc failed')
+            print('------------------------------------------------------')
             return (True, -1, switches, detour_edges)
+        
+    print('Routing via RouteDetCirc success')
+    print('------------------------------------------------------')
     return (False, hops, switches, detour_edges)
 
 #select next arborescence to bounce
@@ -1012,7 +1033,12 @@ def RouteDetBounce(s, d, fails, T):
             hops += 1
         if hops > 3*n or switches > k*n:
             print("cycle Bounce")
+            print('Routing via RouteDetBounce failed')
+            print('------------------------------------------------------')
             return (True, hops, switches, detour_edges)
+        
+    print('Routing via RouteDetCirc success')
+    print('------------------------------------------------------')
     return (False, hops, switches, detour_edges)
 
 #construct BIDB 7 matrix
@@ -1108,8 +1134,8 @@ def PrepareSQ1(G) :
                 #print(" ")
                 #print("SQ nachher : " , SQ1)
 
-    #print(" ")
-    #print("PREPARE SQ1 FERTIG")
+    print(" ")
+    print("PREPARE SQ1 FERTIG")
     return SQ1
 
 
@@ -1159,8 +1185,12 @@ def RouteSQ1(s, d, fails, T):
             index += 1
             hops += 1
         if hops > 3*n or switches > k*n:
-            print("cycle square one")
+            print('Routing via SquareOne failed')
+            print('------------------------------------------------------')
             return (True, hops, switches, detour_edges)
+        
+    print('Routing via SquareOne success')
+    print('------------------------------------------------------')
     return (False, hops, switches, detour_edges)
 
 

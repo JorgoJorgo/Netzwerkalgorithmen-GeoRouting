@@ -33,7 +33,7 @@ DEBUG = True
 # Hier erfolgt der Vergleich zwischen allen Modifikationen von MultipleTrees
 algos = {
 'Faces': [find_faces,RouteFaces],
-'MultipleTrees': [multiple_trees_pre, RouteMultipleTrees],
+#'MultipleTrees': [multiple_trees_pre, RouteMultipleTrees],
 # 'MultipleTrees Mod Breite': [multiple_trees_pre_breite_mod, RouteMultipleTrees],
 # 'MultipleTrees Mod Anzahl': [multiple_trees_pre_num_of_trees_mod, RouteMultipleTrees],
 # 'MultipleTrees Mod Reihenfolge': [multiple_trees_pre_order_of_edps_mod, RouteMultipleTrees],
@@ -42,9 +42,9 @@ algos = {
 # 'Breite and Inverse FR2': [multiple_trees_pre_breite_mod_and_inverse, RouteMultipleTrees],
 # 'Anzahl and Random FR2' : [multiple_trees_pre_num_of_trees_mod_and_random_order, RouteMultipleTrees],
 # 'MultipleTrees Mod Recycling': [multiple_trees_pre_recycling, RouteMultipleTrees],
-'SquareOne FR3': [PrepareSQ1, RouteSQ1],
+'SquareOne' : [PrepareSQ1, RouteSQ1],
 # 'One Tree Breite Mod': [one_tree_pre_breite_mod,RouteOneTree],
-'OneTree' : [one_tree_pre , RouteOneTree],
+#'OneTree' : [one_tree_pre , RouteOneTree],
 #'OneTree Inverse Mod FR' : [one_tree_pre_mod_inverse,RouteOneTree],
 }
 
@@ -56,7 +56,9 @@ algos = {
 #       if success_ratio == 0: 10^6
 #       otherwise (2 - success_ratio) * (stretch + load)
 def one_experiment(g, seed, out, algo):
+
     [precomputation_algo, routing_algo] = algo[:2]
+    
     if DEBUG: print('experiment for ', algo[0])
 
     # precomputation
@@ -265,7 +267,7 @@ def run_faces(out=None, seed=0, rep=10):
 def experiments(switch="all", seed=0, rep=100):
 
     if switch in ["faces"]:
-        out = start_file("results/benchmark-faces-all-multiple-trees-FR" + str(o) + "-" + str(n) + "-" + str(k))
+        out = start_file("results/benchmark-faces-custom-all-multiple-trees-FR" + str(o) + "-" + str(n) + "-" + str(k))
         run_faces(out=out, seed=seed, rep=rep)
         out.close()
 
