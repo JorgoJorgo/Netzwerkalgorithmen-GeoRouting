@@ -28,10 +28,15 @@ def create_random_planar_graph(number_nodes, number_edges):
 
 # Find all the faces of a planar graph
 def find_faces(G, pos):
+
+
     half_edges_in_faces = set()
+
     faces = []
 
-    nx.draw(G, pos, with_labels=True, node_size=700, node_color="green", font_size=8)
+    #G = G.copy()
+
+    #nx.draw(G, pos, with_labels=True, node_size=700, node_color="green", font_size=8)
     #plt.show()
 
     for node in G.nodes:
@@ -51,7 +56,7 @@ def find_faces(G, pos):
 
                     nx.draw(G, pos, with_labels=True, node_size=700, node_color="red", font_size=8)
 
-                    #plt.show()
+                    plt.show()
                     traceback.print_exc()
                     print(f"An unexpected error occurred: {e}")
                     

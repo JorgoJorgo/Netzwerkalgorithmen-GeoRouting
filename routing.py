@@ -132,20 +132,11 @@ def RouteFaces(s,d,fails,faces):
     
     print("Routing in faces started for : ", s , " -> " , d) 
 
-    #for face in faces:
-    #    print(face.nodes)
-
-    #print("Faces : " ,faces)
 
     currentNode = s
 
     #als erstes muss man das erste Face finden von dem man aus startet, dafür stehen nur die Faces von s zur verfügung
     possible_start_faces = [face for face in faces[:-1] if s in face]
-
-    #print("Faces mit Source ", s)
-
-    #for face in possible_start_faces:
-    #    print(face.nodes)
 
     #hier speicher ich mir die schnittpunkte von jedem face
 
@@ -157,10 +148,9 @@ def RouteFaces(s,d,fails,faces):
         item = (-99999999999,-99999999999999 , -99999999999999999999 , -99999999999999999)
 
         intersection_points_start_faces.append(item)
-        
-    #print("Intersection Points with Start Faces :")
-    #print(*intersection_points_start_faces)
+
     indexJ = 0
+    
     for start_face in possible_start_faces:
         
         old_Node = s
@@ -174,18 +164,11 @@ def RouteFaces(s,d,fails,faces):
         #-2 weil der letzte Index der ganze Graph ist und man immer +1 auf den Index rechnet
         for i in range(len(start_face.nodes)-1):
 
-            #print("----------")
-            #print("Prüfe jetzt den Schnittpunkt der Edges : ")
-
-            #print("Imaginary Edge : ",imaginary_edge)
-
            
             
             #jetzt muss ich hier für jede Kante prüfen ob sie geschnitten wird und den Schnittpunkt speichern
             current_edge = (currentNodeInStartFace, next_node)
-            #print("Current Edge : ", current_edge) 
             
-            #wie kriege ich hier die Position der current_edge ?
             # hier bekomme ich die Position der current_edge
             pos_current_edge = (
                 faces[len(faces) - 1].nodes[currentNodeInStartFace]['pos'],
@@ -217,12 +200,9 @@ def RouteFaces(s,d,fails,faces):
                 new_intersection = closer_point(currentNewIntersectionPoint, currentIntersectionPoint ,currentImaginaryPoint)
 
                 if(new_intersection == intersection):
-
-                    #print("Old Best Intersection Point : ", intersection_points_start_faces[indexJ])
-                    
+     
                     intersection_points_start_faces[indexJ] = (intersection[0],intersection[1],currentNode,next_node)
                     
-                    #print("New Best Intersection Point : ", intersection_points_start_faces[indexJ])
 
                 
             detour_edges.append((currentNode,next_node))
@@ -244,11 +224,9 @@ def RouteFaces(s,d,fails,faces):
         indexJ = indexJ + 1
         switches = switches +1
 
-    #print("Intersection Points with Start Faces :")
-    #print(*intersection_points_start_faces)
 
     print(" ")
-    print("ROUTING PER START-FACES FEHLGESCHLAGEN")
+    print("Routing via second Faces started")
     currentFace = []
     print(" ")
 
@@ -301,14 +279,9 @@ def RouteFaces(s,d,fails,faces):
     
     nextNode = s
 
-    #print("best_intersection[3] : ", best_intersection[3])
-
-    #input("CLICK")
     
     #schleife um das jetzige face bis zum besten schnittpunkt durchzugehen
     while currentNode != best_intersection[2]:
-
-        #print("CurrentNode : ", currentNode)
         
         # Finde die Nachbarn des aktuellen Knotens im aktuellen Face
         neighbors = list(currentFace.neighbors(currentNode))
@@ -328,16 +301,26 @@ def RouteFaces(s,d,fails,faces):
         currentNode = nextNode    
 
 
-    #print("CurrentFace Vorher : ", currentFace.nodes())
-
     #jetzt muss ich currentFace auf das nächste Face setzen
     #als erstes hab ich versucht nach der Regel zu gehen: "jede Kante ist in genau 2 Faces drin"
     #das stimmt leider nicht, da die äußeren Kanten in nur 1 face sind
     #daher nehme ich jetzt einfach ein anderes Face mit CurrentNode drin 
     
     updateFaces = faces[:-1]
+
     face_pool = [face for face in updateFaces if currentNode in face]
-    face_pool.remove(currentFace)
+    
+    if currentFace in face_pool:     
+        face_pool.remove(currentFace)
+    
+    #Sonderfall, bei dem der Schnittpunkt vom Startface nicht in 2 verschiedenen Faces liegt
+    #diesen Fall hier könnte man so ausweiten, dass der nächst-beste Schnittpunkt oder Punkt im Face gefunden wird, der auch 
+    #ein weiteres Face besitzt von dem man aus weiter Routen könnte
+    else:
+        print("Routing failed via Faces, starting Face Intersection has no opposite Interface")
+        print('------------------------------------------------------')
+        return (True, hops, switches, detour_edges)
+    
 
     currentFace = face_pool[0]
 
@@ -436,8 +419,6 @@ def RouteFaces(s,d,fails,faces):
 
                 face_pool = [face for face in updateFaces if currentNode in face]
 
-                face_pool.remove(currentFace)
-
                 currentFace = face_pool[0]
 
                 switches = switches + 1
@@ -464,8 +445,6 @@ def RouteFaces(s,d,fails,faces):
                 
                 hops = hops +1
 
-        #currentFace umschalten auf ein anderes face von einem knoten des schnittpunkts
-        #print("Checking Face : ", list(currentFace.nodes()))
         break
     
 

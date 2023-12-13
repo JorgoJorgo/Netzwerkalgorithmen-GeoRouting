@@ -84,12 +84,12 @@ import math
 
 # FÜR WEITERFÜHRENDE EXPERIMENTE
 
-count = 7
-TitleAlgo1 = " MultipleTrees"
-algorithm1 = 'multipleTrees'
+count = 30
+TitleAlgo1 = " Faces"
+algorithm1 = 'Faces'
 
-TitleAlgo2 = " OneTree Inverse Mod"
-algorithm2 = 'oneTreeInvers'
+TitleAlgo2 = " SquareOne"
+algorithm2 = 'squareOne'
 
 # TitleAlgo1 = " OneTree"
 # algorithm1 = 'oneTree'
@@ -118,7 +118,7 @@ alg2_counts = []
 alg1_sum_hops = []
 alg2_sum_hops = []
 
-for i in range(1,25):
+for i in range(1,1):
 
     number = str(i)
 
@@ -133,7 +133,8 @@ for i in range(1,25):
     #filepath = "OneTreeInverse/benchmark-regular-inverseOneTree-FR"+number+"-40-5.txt"
     #filepath = "results/benchmark-regular-inverseOneTree-FR"+number+"-40-5.txt"
     #filepath = "WeiterfuhrendeExperimente/PlotMitte_nurInfZeilenRaus/benchmark-regular-weiterfuehrend-FR"+number+"-80-6.txt"
-    filepath = "WeiterfuhrendeExperimente/PlotRechts_infWiederholungenRaus/benchmark-regular-weiterfuehrend-FR"+number+"-80-6.txt"
+    #filepath = "WeiterfuhrendeExperimente/PlotRechts_infWiederholungenRaus/benchmark-regular-weiterfuehrend-FR"+number+"-80-6.txt"
+    filepath = "results/benchmark-faces-custom-all-multiple-trees-FR2-30-3.txt"
     FR = '_fr'+number
 
     ###################################################################################################################

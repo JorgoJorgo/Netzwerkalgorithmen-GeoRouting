@@ -32,7 +32,7 @@ DEBUG = True
 
 # Hier erfolgt der Vergleich zwischen allen Modifikationen von MultipleTrees
 algos = {
-'Faces': [find_faces,RouteFaces],
+'Faces FR2': [find_faces,RouteFaces],
 #'MultipleTrees': [multiple_trees_pre, RouteMultipleTrees],
 # 'MultipleTrees Mod Breite': [multiple_trees_pre_breite_mod, RouteMultipleTrees],
 # 'MultipleTrees Mod Anzahl': [multiple_trees_pre_num_of_trees_mod, RouteMultipleTrees],
@@ -42,7 +42,7 @@ algos = {
 # 'Breite and Inverse FR2': [multiple_trees_pre_breite_mod_and_inverse, RouteMultipleTrees],
 # 'Anzahl and Random FR2' : [multiple_trees_pre_num_of_trees_mod_and_random_order, RouteMultipleTrees],
 # 'MultipleTrees Mod Recycling': [multiple_trees_pre_recycling, RouteMultipleTrees],
-'SquareOne' : [PrepareSQ1, RouteSQ1],
+'SquareOne FR2' : [PrepareSQ1, RouteSQ1],
 # 'One Tree Breite Mod': [one_tree_pre_breite_mod,RouteOneTree],
 #'OneTree' : [one_tree_pre , RouteOneTree],
 #'OneTree Inverse Mod FR' : [one_tree_pre_mod_inverse,RouteOneTree],
@@ -68,7 +68,7 @@ def one_experiment(g, seed, out, algo):
     
     t = time.time()
     
-    if(precomputation_algo == algos["Faces"][0]):
+    if(precomputation_algo == algos["Faces FR2"][0]):
         pos = g.graph["pos"]
         precomputation = precomputation_algo(g,pos)
     else:
@@ -232,15 +232,15 @@ def run_custom(out=None, seed=0, rep=5):
         set_parameters(original_params)
 
 
-def run_faces(out=None, seed=0, rep=10):
-
+def run_faces(out=None, seed=0, rep=5):
     original_params = [n, rep, k, samplesize, f_num, seed, name]
     graphs = []
     fails = []
     faces1 = []
     pos1 = []
 
-    graph1, fail1, faces1, pos1 = create_faces_graph()
+    #hier müsste man ins create Faces graph n reinpacken können um die Evaluation leichter zu machen
+    graph1, fail1, faces1, pos1 = create_faces_graph(n,k)
     graphs.append(graph1)
     fails.append(fail1) 
 
@@ -267,7 +267,7 @@ def run_faces(out=None, seed=0, rep=10):
 def experiments(switch="all", seed=0, rep=100):
 
     if switch in ["faces"]:
-        out = start_file("results/benchmark-faces-custom-all-multiple-trees-FR" + str(o) + "-" + str(n) + "-" + str(k))
+        out = start_file("results/benchmark-faces-random-all-multiple-trees" + "-"  + str(n) + "-" + str(k))
         run_faces(out=out, seed=seed, rep=rep)
         out.close()
 
@@ -300,14 +300,14 @@ def experiments(switch="all", seed=0, rep=100):
 
 
 if __name__ == "__main__":
-
-    for i in range(2,3):
+    n = 8
+    for i in range(2,18): #diese Zahl verändert man, wenn in jedem durchlauf bspw. Knoten Anzahl oder Fehleranzahl erhöhen will
         o = i 
-        f_num = i * 5 #number of failed links
-        n = 20 # number of nodes
-        k = 5 #base connectivity
+        f_num = 0 #number of failed links
+        n = n + 2 # number of nodes
+        k = 3 #base connectivity
         samplesize = 5 #number of sources to route a packet to destination
-        rep = 3 #number of experiments
+        rep = 10 #number of experiments #hier gibt man ein wie viele Wiederholungen ein Algorithmus durchlaufen muss
         switch = 'all' #which experiments to run with same parameters
         seed = 0  #random seed
         name = "benchmark-" #result files start with this name

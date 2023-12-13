@@ -514,9 +514,9 @@ def write_graphs():
         f.close()
 
  
-def create_faces_graph():
+def create_faces_graph(n,k):
 
-    G = create_random_planar_graph(30, 3)
+    G = create_random_planar_graph(n, k)
 
     pos = nx.planar_layout(G)
 
@@ -525,8 +525,8 @@ def create_faces_graph():
         plt.text(coordinates[0], coordinates[1], f"{coordinates}", fontsize=8, ha='left')
 
 
-    nx.draw(G, pos, with_labels=True, node_size=700, node_color="yellow", font_size=8)
-    plt.show()
+    #nx.draw(G, pos, with_labels=True, node_size=700, node_color="yellow", font_size=8)
+    #plt.show()
 
     fails = list()
     G.graph["pos"] = pos
