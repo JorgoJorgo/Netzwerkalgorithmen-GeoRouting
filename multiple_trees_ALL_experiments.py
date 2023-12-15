@@ -301,7 +301,7 @@ def experiments(switch="all", seed=0, rep=100):
 
 if __name__ == "__main__":
     n = 8
-    for i in range(2,18): #diese Zahl verändert man, wenn in jedem durchlauf bspw. Knoten Anzahl oder Fehleranzahl erhöhen will
+    for i in range(2,10): #diese Zahl verändert man, wenn in jedem durchlauf bspw. Knoten Anzahl oder Fehleranzahl erhöhen will
         o = i 
         f_num = 0 #number of failed links
         n = n + 2 # number of nodes

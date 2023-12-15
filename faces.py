@@ -57,7 +57,9 @@ def find_faces(G, pos):
                     nx.draw(G, pos, with_labels=True, node_size=700, node_color="red", font_size=8)
 
                     plt.show()
+                    
                     traceback.print_exc()
+                    
                     print(f"An unexpected error occurred: {e}")
                     
                 half_edges_in_faces.update(found_half_edges)
@@ -77,7 +79,18 @@ def find_faces(G, pos):
     graph_last = G.copy()
     for node in graph_last:
         graph_last.nodes[node]['pos'] = pos[node]
+        
     faces.append(graph_last)
+    
+    
+    #hier fehlt dann herauszufinden, welches face das outer face ist
+    #print("Faces : ")
+    #for face in faces[:-1]:
+    #    print(list(face))
+        
+    #nx.draw(G, pos, with_labels=True, node_size=1200, node_color="green", font_size=9)
+    
+    #plt.show()
     return faces
 
 
