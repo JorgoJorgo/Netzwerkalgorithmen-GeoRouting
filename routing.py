@@ -415,7 +415,7 @@ def RouteFaces(s,d,fails,faces):
             #jeden Knoten im jeweiligen StartFace durchgehen
             for nodeI in face:
                 
-                
+                #test
                 
                 #prüfen ob der current_node besser ist als der closest_point
                 current_node = nodeI
