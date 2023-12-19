@@ -111,6 +111,19 @@ def create_intersection_structure(length):
     
     return intersection_structure
 
+# Hilfsfunktion um zwischen 2 punkten (point1 & point2) den nähren punkt zu point3 zu bestimmen
+def find_closest_point(point1, point2, target_point):
+    x1, y1, id1 = point1
+    x2, y2, id2 = point2
+    x_target, y_target, target_id = target_point
+
+    distance1 = ((x1 - x_target)**2 + (y1 - y_target)**2)**0.5
+    distance2 = ((x2 - x_target)**2 + (y2 - y_target)**2)**0.5
+
+    if distance1 < distance2:
+        return point1
+    else:
+        return point2
 ############################################################################################################
 
 
@@ -120,7 +133,7 @@ def RouteFaces(s,d,fails,faces):
     hops = 0
     switches = 0
 
-
+    skipSonderfall = False
     #im letzten index von faces ist der ganze graph drin##################################
     faces[len(faces)-1].add_edge(s, d)
 
@@ -264,7 +277,7 @@ def RouteFaces(s,d,fails,faces):
         #ob man direkt die destination erreicht
         
         updateFaces = faces[:-1]
-
+        print("Sonderfall 1: Versuche am Outerface zu routen")
         face_pool = [face for face in updateFaces if currentNode in face]
         
         if currentFace in face_pool:  
@@ -289,7 +302,6 @@ def RouteFaces(s,d,fails,faces):
             #hier findet dann das durchlaufen eines Faces statt
             while(nextNode != currentSource):
             
-                print("Gehe grad Node durch : ", currentNode)
                 # Finde die Nachbarn des aktuellen Knotens im aktuellen Face
                 neighbors = list(currentFace.neighbors(currentNode))
 
@@ -380,12 +392,66 @@ def RouteFaces(s,d,fails,faces):
     #diesen Fall hier könnte man so ausweiten, dass der nächst-beste Schnittpunkt oder Punkt im Face gefunden wird, der auch 
     #ein weiteres Face besitzt von dem man aus weiter Routen könnte
     else:
-        print("Routing failed via Faces, starting Face Intersection has no opposite Interface")
-        print('------------------------------------------------------')
-        return (True, hops, switches, detour_edges)
+        
+        print("Sonderfall 2: Versuche den besten Punkt in den StartFaces zu finden")
+        skipSonderfall = True
+        
+        #hier müsste man die StartFaces nochmal durchgehen und den besten Punkt finden zur Destination,
+        #der auch ein weiteres Face besitzt
+        
+        #(coordX,coordY,nodeID)
+        closest_point = (-999,-999,-999)
+        #um nachher durch das beste Face zu routen
+        best_face = []
+        
+        coordXd , coordYd = faces[len(faces) - 1].nodes[d]['pos']
+        destination_point = (coordXd,coordYd,d)
+        
+        faces_without_start_faces = set(faces[:-1]) - set(possible_start_faces)
+        
+        #jedes Start-Face durchgehen
+        for face in possible_start_faces:
+            
+            #jeden Knoten im jeweiligen StartFace durchgehen
+            for nodeI in face:
+                
+                
+                
+                #prüfen ob der current_node besser ist als der closest_point
+                current_node = nodeI
+                
+                coordXcurrent, coordYcurrent = faces[len(faces) - 1].nodes[current_node]['pos']
+                current_node_point = (coordXcurrent,coordYcurrent,current_node)
+                
+                if(closest_point != closer_point(current_node_point,closest_point,destination_point)):
+                    
+                    #der jetzige Punkt ist näher an der Destination dran
+                    
+                    #jetzt muss geprüft werden ob der jetzige Punkt auch in einem anderen Face drin ist,
+                    #welches nicht zu den StartFaces gehört
+                    
+                    for face_without_start in faces_without_start_faces:
+                        
+                        #wenn der jetzige beste punkt in einem anderen Face ist, von dem man das Routing aus
+                        #fortsetzen kann dann geht man in dieses Face rein
+                        if(current_node in face_without_start.nodes):
+                            
+                            closest_point = current_node_point
+                            best_face = face_without_start
+        
+        if(best_face == (-999,-999,-999)):     
+            print("Routing failed via Faces, starting Face Intersection has no opposite Interface and no Point was found with an opposite Face")
+            print('------------------------------------------------------')
+            return (True, hops, switches, detour_edges)
+        
+        else: 
+            currentFace = best_face
+            currentNode = list(best_face.nodes)[0]
     
-
-    currentFace = face_pool[0]
+    #in dem Fall hätte man regulär den Schnittpunkt gefunden
+    if(not skipSonderfall):            
+        currentFace = face_pool[0]
+        currentNode = list(currentFace.nodes)[0]
 
     scouting = True
     lastWalk = False
