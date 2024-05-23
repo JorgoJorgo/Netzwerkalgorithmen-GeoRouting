@@ -29,7 +29,7 @@ def create_random_planar_graph(number_nodes, number_edges):
 # Find all the faces of a planar graph
 def find_faces(G, pos):
 
-
+    print(G)
     half_edges_in_faces = set()
 
     faces = []

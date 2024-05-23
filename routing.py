@@ -128,7 +128,8 @@ def find_closest_point(point1, point2, target_point):
 
 
 def RouteFaces(s,d,fails,faces):
-
+    print(faces)
+    input(" ")
     detour_edges = []
     hops = 0
     switches = 0
